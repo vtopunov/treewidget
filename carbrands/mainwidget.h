@@ -12,6 +12,9 @@ class MainWidget : public QWidget
 public:
 	MainWidget(QWidget *parent = 0);
 
+protected:
+	virtual void closeEvent(QCloseEvent*) Q_DECL_OVERRIDE;
+
 private:
 	Ui::MainWidget ui;
 };

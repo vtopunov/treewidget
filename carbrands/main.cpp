@@ -7,7 +7,7 @@ QString functionName(QString func) {
 
 void messageHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg)
 {
-	static const QString logName( QStringLiteral("log.txt") );
+	static const QString logName("log.txt");
 	
 	static const QMap<QtMsgType, QString> typeToString {
 		{ QtMsgType::QtDebugMsg, "debug" },
@@ -16,9 +16,8 @@ void messageHandler(QtMsgType type, const QMessageLogContext& context, const QSt
 		{ QtMsgType::QtFatalMsg, "fatal" }
 	};
 
-	// Ñlear log
 	static volatile bool first = true;
-	if (first) {
+	if (first) { // Ñlear log
 		first = false;
 		auto old = logName + ".old";
 		QFile::remove(old);

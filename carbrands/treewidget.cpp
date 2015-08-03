@@ -7,28 +7,6 @@ QSize buttonsIconSize() {
 	return QSize(WIDTH, HEIGHT);
 }
 
-QModelIndex findSiblingItem(const QModelIndex& index, const QString& text) {
-	auto item = ::item(index);
-	if (!item) {
-		qWarning() << "item is null";
-		return{};
-	}
-	auto emptyItemIndex = item->findSibling(text);
-	bool isEmptyItem = emptyItemIndex >= 0;
-	return (isEmptyItem) ? index.sibling(emptyItemIndex, 0) : QModelIndex();
-}
-
-QModelIndex findChildItem(QSortFilterProxyModel* model, const QModelIndex& parent, const QString& text) {
-	auto index = model->index(0, 0, parent);
-	if (index.isValid()) {
-		index = findSiblingItem(model->mapToSource(index), text);
-		if (index.isValid()) {
-			return model->mapFromSource(index);
-		}
-	}
-	return{};
-}
-
 TreeWidget::TreeWidget(QWidget *parent)
 	: QTreeView(parent),
 	sourceModel_(nullptr),
@@ -59,15 +37,18 @@ TreeWidget::TreeWidget(QWidget *parent)
 TreeWidget::~TreeWidget() {}
 
 void TreeWidget::closeEditor() {
-	setDisabled(true);
-	setDisabled(false);
+	setEnabled(!isEnabled());
+	setEnabled(!isEnabled());
 }
 
 void TreeWidget::insertRow(int row, const QModelIndex& parent) {
 	qDebug() << "insertRow";
 	closeEditor();
 
-	auto editIndex = findChildItem(model_, parent, QString());
+	QModelIndex editIndex = model_->mapFromSource(
+		sourceModel_->index(QString(), model_->mapToSource(parent))
+	);
+
 	if (!editIndex.isValid()) {
 		model_->insertRow(row, parent);
 		editIndex = model_->index(row, 0, parent);
@@ -92,7 +73,20 @@ void TreeWidget::removeRow(int row, const QModelIndex& parent) {
 
 void TreeWidget::search(const QString& searchText) {
 	model_->setFilterFixedString(searchText);
-	for (auto& expandIndex : model_->indexesExpand()) {
-		expand(expandIndex);
+	if (!searchText.isEmpty()) {
+		for (auto& expandIndex : model_->indexesExpand()) {
+			expand(expandIndex);
+		}
+	}
+}
+
+QByteArray TreeWidget::serialize() const {
+	return sourceModel_->serialize();
+}
+
+void TreeWidget::deserialize(const QByteArray& data) {
+	sourceModel_->deserialize(data);
+	if (sourceModel_->rowCount() <= 0) {
+		sourceModel_->insertRow(0);
 	}
 }

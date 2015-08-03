@@ -42,7 +42,13 @@ public:
 		QWidget *parent,
 		const QStyleOptionViewItem &option,
 		const QModelIndex &index
-	) const Q_DECL_OVERRIDE;;
+	) const Q_DECL_OVERRIDE;
+
+	void updateEditorGeometry(
+		QWidget *editor,
+		const QStyleOptionViewItem &option,
+		const QModelIndex &index
+	) const Q_DECL_OVERRIDE;
 
 protected:
 	bool editorEvent(
@@ -54,7 +60,6 @@ protected:
 
 protected:
 	QVector<QPixmap> icons_;
-	QLineEdit* editor_;
 	QString placeholderText_;
 };
 

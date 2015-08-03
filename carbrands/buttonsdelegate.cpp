@@ -7,9 +7,9 @@ enum { WIDTH_MARGIN = 2 };
 
 class ButtonIterate {
 public:
-	ButtonIterate(const QVector<QPixmap>& icons, const QModelIndex &index) :
+	ButtonIterate(const QVector<QPixmap>& icons, bool isHideAddChild) :
 		icons_(icons),
-		isChild_(index.parent().isValid()),
+		isHideAddChild_(isHideAddChild),
 		picon_(nullptr),
 		buttonIndex_(icons_.size())
 	{
@@ -18,7 +18,7 @@ public:
 	const QPixmap& icon() const { return *picon_; }
 
 	bool isHide() const { 
-		return isChild_ && type() == ButtonsDelegate::ADD_CHILD_ITEM_BUTTON;
+		return isHideAddChild_ && type() == ButtonsDelegate::ADD_CHILD_ITEM_BUTTON;
 	}
 
 	bool next() {
@@ -35,19 +35,23 @@ public:
 
 private:
 	const QVector<QPixmap>& icons_;
-	const bool isChild_;
+	const bool isHideAddChild_;
 	const QPixmap* picon_;
 	int buttonIndex_;
 };
+
+bool isHideAddChild(const QModelIndex& index) {
+	return index.parent().isValid();
+}
 
 class ButtonPositionIterate : public ButtonIterate {
 public:
 	ButtonPositionIterate(
 		const QVector<QPixmap>& icons, 
 		const QStyleOptionViewItem &option, 
-		const QModelIndex &index
-	) : ButtonIterate(icons, index), pos_(option.rect.right(), option.rect.center().y())
-	{}
+		bool isHideAddChild
+	) : ButtonIterate(icons, isHideAddChild), 
+		pos_(option.rect.right(), option.rect.center().y()) {}
 
 	QPoint nextPos() { 
 		return QPoint(
@@ -89,16 +93,18 @@ void ButtonsDelegate::paint(QPainter *painter, const QStyleOptionViewItem &optio
 	QItemDelegate::paint(painter, option, index);
 	
 	if (index.data(Qt::DisplayRole).toString().isEmpty()) {
+		auto oldPen = painter->pen();
 		painter->setPen(QColor(0, 0, 0, 64));
 		painter->drawText(
 			option.rect,
 			placeholderText_,
 			QTextOption(Qt::AlignVCenter)
 		);
+		painter->setPen(oldPen);
 	}
 
 	if (option.state & QStyle::State_MouseOver) {
-		ButtonPositionIterate button(icons_, option, index);
+		ButtonPositionIterate button(icons_, option, index.parent().isValid());
 		while (button.next()) {
 			if (!button.isHide()) {
 				painter->drawPixmap(button.nextPos(), button.icon());
@@ -107,19 +113,24 @@ void ButtonsDelegate::paint(QPainter *painter, const QStyleOptionViewItem &optio
 	}
 }
 
-QSize ButtonsDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
-{
-	auto size = QItemDelegate::sizeHint(option, index);
-
-	ButtonIterate button(icons_, index);
+QSize buttonsSize(const QVector<QPixmap>& icons, bool isHideAddChild, QSize size = QSize()) {
+	ButtonIterate button(icons, isHideAddChild);
 	while (button.next()) {
 		if (!button.isHide()) {
 			size.rwidth() += button.width();
 			size.setHeight(qMax(size.height(), button.height()));
 		}
 	}
-
 	return size;
+}
+
+QSize ButtonsDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+	return buttonsSize(
+		icons_, 
+		isHideAddChild(index), 
+		QItemDelegate::sizeHint(option, index)
+	);
 }
 
 QWidget *ButtonsDelegate::createEditor(
@@ -132,7 +143,22 @@ QWidget *ButtonsDelegate::createEditor(
 	if (lineEdit) {
 		lineEdit->setPlaceholderText(placeholderText_);
 	}
-	return editor;
+	return lineEdit;
+}
+
+void ButtonsDelegate::updateEditorGeometry(
+	QWidget *editor,
+	const QStyleOptionViewItem &option,
+	const QModelIndex &index
+) const {
+	auto lineEdit = qobject_cast<QLineEdit*>(editor);
+	if (lineEdit) {
+		auto rect = option.rect;
+		rect.setWidth(option.rect.width()
+			- buttonsSize(icons_, false).width()
+		);
+		lineEdit->setGeometry(rect);
+	}
 }
 
 bool ButtonsDelegate::editorEvent(
@@ -150,7 +176,7 @@ bool ButtonsDelegate::editorEvent(
 		type == QEvent::MouseMove ) {
 		QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(qevent);
 		
-		ButtonPositionIterate button(icons_, option, index);
+		ButtonPositionIterate button(icons_, option, isHideAddChild(index));
 		while (button.next()) {
 			if (!button.isHide()) {
 				auto pos = button.nextPos().x();

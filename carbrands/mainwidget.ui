@@ -7,17 +7,15 @@
     <x>0</x>
     <y>0</y>
     <width>260</width>
-    <height>455</height>
+    <height>367</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Car Brands</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">
-        border: 0;
-        font: 12pt &quot;MS Shell Dlg 2&quot;;
-      </string>
+   <string notr="true"> border: 0;
+ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
@@ -36,13 +34,6 @@
     <number>0</number>
    </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <property name="spacing">
-      <number>0</number>
-     </property>
-    </layout>
-   </item>
-   <item>
     <widget class="QLineEdit" name="searchLine">
      <property name="frame">
       <bool>false</bool>
@@ -54,20 +45,81 @@
    </item>
    <item>
     <widget class="TreeWidget" name="tree">
-     <property name="focusPolicy">
-      <enum>Qt::NoFocus</enum>
+     <property name="palette">
+      <palette>
+       <active>
+        <colorrole role="Highlight">
+         <brush brushstyle="SolidPattern">
+          <color alpha="0">
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+        <colorrole role="HighlightedText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </active>
+       <inactive>
+        <colorrole role="Highlight">
+         <brush brushstyle="SolidPattern">
+          <color alpha="0">
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+        <colorrole role="HighlightedText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </inactive>
+       <disabled>
+        <colorrole role="Highlight">
+         <brush brushstyle="SolidPattern">
+          <color alpha="0">
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+        <colorrole role="HighlightedText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </disabled>
+      </palette>
      </property>
      <property name="frameShape">
       <enum>QFrame::NoFrame</enum>
      </property>
-     <property name="editTriggers">
-      <set>QAbstractItemView::DoubleClicked</set>
+     <property name="dragEnabled">
+      <bool>true</bool>
      </property>
-     <property name="selectionMode">
-      <enum>QAbstractItemView::NoSelection</enum>
+     <property name="dragDropMode">
+      <enum>QAbstractItemView::DragDrop</enum>
      </property>
-     <property name="expandsOnDoubleClick">
-      <bool>false</bool>
+     <property name="defaultDropAction">
+      <enum>Qt::CopyAction</enum>
      </property>
      <attribute name="headerVisible">
       <bool>false</bool>

@@ -7,15 +7,6 @@
 
 #include "treeitem.h"
 
-
-inline TreeItem* item(const QModelIndex& index, TreeItem* defValue = 0) {
-	return (index.isValid())
-		? static_cast<TreeItem*>(index.internalPointer())
-		: defValue;
-}
-
-const QString& treeMimeType();
-
 class TreeModel : public QAbstractItemModel
 {
     Q_OBJECT
@@ -25,7 +16,23 @@ public:
     ~TreeModel();
 
 public:
-	QModelIndex addItem(const QString& data, const QModelIndex& parent = QModelIndex());
+	TreeItem* item(const QModelIndex& index) const {
+		return (index.isValid())
+			? static_cast<TreeItem*>(index.internalPointer())
+			: root_;
+	}
+
+	QModelIndex index(const QString& data, 
+		const QModelIndex& parent = QModelIndex() ) const {
+		auto row = item(parent)->index(data);
+		return (row != -1) ? index(row, 0, parent) : QModelIndex();
+	}
+
+	QModelIndex insert(
+		const QString& data, 
+		int row, 
+		const QModelIndex& parent = QModelIndex()
+	);
 
     QVariant data(const QModelIndex& index, int role) const Q_DECL_OVERRIDE;
 
@@ -54,15 +61,38 @@ public:
 
 	QStringList mimeTypes() const Q_DECL_OVERRIDE;
 
-	Qt::DropActions supportedDropActions() const Q_DECL_OVERRIDE;
-
 	QMimeData *mimeData(const QModelIndexList &indexes) const Q_DECL_OVERRIDE;
 
-	bool dropMimeData(
+	bool canDropMimeData(
 		const QMimeData *data, 
 		Qt::DropAction action,
-		int row, int column, const QModelIndex &parent
+		int row, int column, 
+		const QModelIndex &parent
+	) const Q_DECL_OVERRIDE;
+
+	bool dropMimeData(
+		const QMimeData *data,
+		Qt::DropAction action,
+		int row, int column,
+		const QModelIndex &parent
 	) Q_DECL_OVERRIDE;
+
+	Qt::DropActions supportedDropActions() const Q_DECL_OVERRIDE;
+
+	Qt::DropActions supportedDragActions() const Q_DECL_OVERRIDE;
+
+	QByteArray serialize(const QModelIndex& root = QModelIndex()) const;
+
+	bool deserialize(const QByteArray& data, const QModelIndex& indexTo = QModelIndex(), bool checkOnly = false);
+
+private:
+	bool dropMimeData_helper(
+		const QMimeData *data,
+		Qt::DropAction action,
+		int row, int column,
+		const QModelIndex &parent,
+		bool checkOnly
+	);
 
 private:
 	TreeItem* root_;

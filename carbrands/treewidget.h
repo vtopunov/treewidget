@@ -20,6 +20,8 @@ public slots:
 	void insertRow(int row, const QModelIndex& parent = QModelIndex());
 	void removeRow(int row, const QModelIndex& parent = QModelIndex());
 	void search(const QString& searchText);
+	QByteArray serialize() const;
+	void deserialize(const QByteArray& data);
 
 private:
 	TreeModel* sourceModel_;

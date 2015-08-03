@@ -4,7 +4,7 @@
 <context>
     <name>ButtonsDelegate</name>
     <message>
-        <location filename="buttonsdelegate.cpp" line="66"/>
+        <location filename="buttonsdelegate.cpp" line="70"/>
         <source>Enter text</source>
         <translation>Введите текст</translation>
     </message>
@@ -14,10 +14,10 @@
     <message>
         <location filename="mainwidget.ui" line="14"/>
         <source>Car Brands</source>
-        <translation></translation>
+        <translation>Марки машин</translation>
     </message>
     <message>
-        <location filename="mainwidget.ui" line="51"/>
+        <location filename="mainwidget.ui" line="42"/>
         <source>Search</source>
         <translation>Поиск</translation>
     </message>
